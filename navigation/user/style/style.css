@@ -1,0 +1,542 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+
+.navbar-nav .nav-link.nav-active {
+    font-weight: bold;
+    color: #0d6efd; /* Bootstrap primary */
+    border-bottom: 3px solid #0d6efd;
+}
+
+body {
+  font-family: "Roboto Condensed", sans-serif;
+}
+
+.center-div {
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.navbar {
+    background: linear-gradient(to bottom, #304486, rgb(36, 51, 102));
+    box-shadow: 10px 0 4px #4e4e4e;
+}
+
+.link-active {
+    background-color: #fff;
+    border-radius: 10px;
+    width: 90px;
+    font-weight: 500;
+}
+
+.link-hover {
+    width: 90px;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: background-color 0.2s ease;
+}
+
+.link-hover:hover {
+    background-color: #182242;
+}
+
+.header-below-container {
+    background: linear-gradient(to bottom, #0763e4, #1b73ee);
+    height: 140px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 6px #111;
+}
+
+.card-button-container {
+    width: 300px;
+}
+
+.card-button-container button {
+    height: 100px;
+    width: 100px;
+    border: none;
+    border-radius: 25px;
+    background-color: #0763e4;
+}
+
+.card-button-container button:hover {
+    transition: 0.2s ease;
+    background-color: #c26903;
+}
+
+.card-button-container button i {
+    font-size: 30px;
+    color: #fff;
+}
+
+.userindex-right {
+    border-left: 1px solid #ccc;
+    width: 100%;
+    height: 100%;
+}
+
+.time-card {
+    height: 120px;
+    width: 23%;
+    background-color: #0d6efd;
+    border-radius: 10px;
+    font-weight: bold;
+    background-image: url(../../../img/bg-time.jpg);
+    background-size: cover;
+    color: #fff;
+}
+
+.time-card .time-title {
+    font-size: 34px;
+}
+
+.time-card span {
+    font-size: 18px;
+}
+
+.schedule-card {
+    height: 100vh;
+    width: 23%;
+    border-radius: 10px;
+    font-weight: bold;
+    background-size: cover;
+    color: #303030;
+}
+
+
+    .nav-link.active {
+      font-weight: bold;
+      border-bottom: 3px solid #0d6efd;
+      color: #0d6efd !important;
+    }
+
+    #calendar {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 100%;
+      list-style: none;
+    }
+
+    #calendar a {
+      list-style: none;
+      text-decoration: none;
+    }
+
+    .fc-daygrid-event-harness {
+      cursor: pointer;
+      
+    }
+
+    .fc-event-main {
+      cursor: pointer;
+      
+    }
+
+    .fc-daygrid-event-harness a {
+      font-weight: bold;
+
+    }
+
+
+    /* Make the current day cell more visible */
+    .fc-daygrid-day.fc-day-today {
+    background-color: #8bbbdb !important;  /* stronger amber shade */
+    border: 2px solid #364c94;             /* orange border */
+    font-weight: bold;
+    color: #000;                           /* ensure readable text */
+    }
+
+    /* Optional: also apply to timeGrid views */
+    .fc-timegrid-col.fc-day-today {
+    background-color: #fff3e0 !important;
+    border: 2px solid #364c94;
+    }
+
+.no-caret::after {
+  display: none !important;
+}
+
+.carousel {
+  box-shadow: 0 0 6px #111;
+}
+
+.carousel-item img {
+  max-height: 500px; /* Adjust as needed */
+  width: 100%;
+}
+
+
+@media (max-width: 768px) {
+  .carousel-item img {
+    height: 300px;
+    object-fit: cover;
+  }
+}
+
+.headline-text-card {
+    background: linear-gradient(to bottom, #00255e, #00337a);
+    border-radius: 10px 10px 0 0;
+    height: 60px;
+    color: #ececec;
+    font-weight: 700;
+    font-size: 20px;
+
+    &.text-bold {
+       font-weight: 800;
+       font-size: 24px;
+    }
+}
+
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .headline-text-card {
+    background: linear-gradient(to bottom, #002966, #003580);
+    border-radius: 10px 10px 0 0;
+    height: 50px;
+    color: #ececec;
+    font-weight: 700;
+    font-size: 16px;
+
+    &.text-bold {
+      font-weight: 800;
+      font-size: 20px;
+    }
+  }
+}
+
+
+.headline-text-title {
+    font-size: 18px;
+    list-style: none;
+    text-decoration: none;
+    font-weight: 700;
+    color: #2675e4;
+
+    &:hover {
+      transition: 0.2s ease;
+      background-color: #ccc;
+      border-radius: 4px;
+    }
+}
+
+@media (min-width: 991.98px) and (max-width: 1196px) {
+  .headline-text-title {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .headline-text-title {
+    font-size: 16px;
+  }
+}
+
+
+@media (min-width: 375px) and (max-width: 768px) {
+  .headline-text-title {
+    font-size: 20px;
+    text-align: center;
+  }
+}
+
+.contact-us-container {
+  border-radius: 10px;
+  
+    background: linear-gradient(to bottom, #00409b, #005de0 , #00409b);
+}
+
+.DOLE-title-contactus {
+  font-size: 10px;
+  color: #fff;
+  opacity: 0.9;
+  font-family: 'Cinzel', serif; 
+  font-weight: 700; 
+}
+
+.contact-headline-container {
+  background-color: rgb(255, 17, 0);
+  padding: 4px 16px;
+  font-weight: bold;
+  color: #fff;
+  border-radius: 30px;
+  letter-spacing: 1.4px;
+  opacity: 0.9;
+  
+}
+
+.contact-headline-container span {
+  font-size: 14px;
+}
+
+.contact-us-office {
+  background-color: #002763;
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 5px 15px;
+  border-radius: 8px;
+  opacity: 0.9;
+  letter-spacing: 1px;
+}
+
+.contact-us-number {
+  font-size: 22px;
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 2px;
+  opacity: 0.9;
+
+}
+
+
+.contact-us-email {
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  opacity: 0.9;
+}
+
+.fc-daygrid-day-frame .fc-scrollgrid-sync-inner {
+  cursor: pointer;
+}
+
+
+.card-add-appointment {
+  box-shadow: 0 0 5px #aaa;
+}
+
+.card-add-appointment1 {
+  box-shadow: 0 0 5px #aaa;
+  height: 500px;
+}
+
+.addAppointment-btn {
+  border-radius: 10px;
+  border: none;
+  padding: 10px;
+  background-color: #00337a;
+  box-shadow: 0 0 5px #aaa;
+  color: #fff;
+}
+
+/*footer*/
+
+.footer {
+    background: linear-gradient(to bottom, #00255e, #00419c);
+    color: #fff;
+}
+.footer-wave-svg {
+    background-color: transparent;
+    display: block;
+    height: 30px;
+    position: relative;
+    top: -1px;
+    width: 100%;
+}
+.footer-wave-path {
+    fill: #fffff2;
+}
+
+.footer-content-1 {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1230px;
+    padding: 40px 15px 350px;
+    position: relative;
+}
+
+.footer-content-column {
+    box-sizing: border-box;
+    float: left;
+    padding-left: 15px;
+    padding-right: 15px;
+    width: 100%;
+    color: #fff;
+}
+
+.footer-content-column ul li a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.footer-logo-link {
+    display: inline-block;
+}
+.footer-menu {
+    margin-top: 30px;
+}
+
+.footer-menu-name {
+    color: #fffff2;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: .1em;
+    line-height: 18px;
+    margin-bottom: 0;
+    margin-top: 0;
+    text-transform: uppercase;
+}
+.footer-menu-list {
+    list-style: none;
+    margin-bottom: 0;
+    margin-top: 10px;
+    padding-left: 0;
+}
+.footer-menu-list li {
+    margin-top: 5px;
+}
+
+.footer-call-to-action-description {
+    color: #fffff2;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+.footer-call-to-action-button:hover {
+    background-color: #fffff2;
+    color: #00bef0;
+}
+.button:last-of-type {
+    margin-right: 0;
+}
+.footer-call-to-action-button {
+    background-color: #027b9a;
+    border-radius: 21px;
+    color: #fffff2;
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .1em;
+    line-height: 18px;
+    padding: 12px 30px;
+    margin: 0 10px 10px 0;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: background-color .2s;
+    cursor: pointer;
+    position: relative;
+}
+.footer-call-to-action {
+    margin-top: 30px;
+}
+.footer-call-to-action-title {
+    color: #fffff2;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: .1em;
+    line-height: 18px;
+    margin-bottom: 0;
+    margin-top: 0;
+    text-transform: uppercase;
+}
+.footer-call-to-action-link-wrapper {
+    margin-bottom: 0;
+    margin-top: 10px;
+    color: #fff;
+    text-decoration: none;
+}
+.footer-call-to-action-link-wrapper a {
+    color: #fff;
+    text-decoration: none;
+}
+
+
+
+
+.footer-copyright {
+    background: linear-gradient(to bottom, #00255e, #00255e);
+    color: #fff;
+    padding: 15px 30px;
+  text-align: center;
+}
+
+.footer-copyright-wrapper {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1200px;
+}
+
+.footer-copyright-text {
+  color: #fff;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 18px;
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+.footer-copyright-link {
+    color: #fff;
+    text-decoration: none;
+}
+
+
+
+
+
+
+
+/* Media Query For different screens */
+@media (min-width:320px) and (max-width:479px)  { /* smartphones, portrait iPhone, portrait 480x320 phones (Android) */
+  .footer-content-1 {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1230px;
+    padding: 40px 15px 1050px;
+    position: relative;
+  }
+}
+@media (min-width:480px) and (max-width:599px)  { /* smartphones, Android phones, landscape iPhone */
+  .footer-content-1 {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1230px;
+    padding: 40px 15px 1050px;
+    position: relative;
+  }
+}
+@media (min-width:600px) and (max-width: 800px)  { /* portrait tablets, portrait iPad, e-readers (Nook/Kindle), landscape 800x480 phones (Android) */
+  .footer-content-1 {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1230px;
+    padding: 40px 15px 1050px;
+    position: relative;
+  }
+}
+@media (min-width:801px)  { /* tablet, landscape iPad, lo-res laptops ands desktops */
+
+}
+@media (min-width:1025px) { /* big landscape tablets, laptops, and desktops */
+
+}
+@media (min-width:1281px) { /* hi-res laptops and desktops */
+
+}
+
+
+
+
+@media (min-width: 760px) {
+  .footer-content {
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 1230px;
+      padding: 40px 15px 450px;
+      position: relative;
+  }
+
+  .footer-wave-svg {
+      height: 50px;
+  }
+
+  .footer-content-column {
+      width: 24.99%;
+  }
+}
+@media (min-width: 568px) {
+  /* .footer-content-column {
+      width: 49.99%;
+  } */
+}
+
+

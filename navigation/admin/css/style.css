@@ -1,0 +1,310 @@
+/* Base Styles */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f6f8;
+  margin: 0;
+  padding: 0;
+}
+
+.wrapper {
+  display: flex;
+}
+
+.center-div {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+/* Sidebar */
+#sidebar {
+  background: linear-gradient(to bottom, #0038A8, #001c42);
+  color: #fff;
+  width: 250px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  overflow-x: hidden;
+  transition: transform 0.3s ease;
+  transform: translateX(0);
+}
+
+#sidebar.collapsed {
+  transform: translateX(-100%);
+}
+
+/* Sidebar Contents */
+#sidebar .sidebar-header {
+  padding: 20px;
+  font-size: 1.4em;
+  text-align: center;
+}
+
+#sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#sidebar ul li a {
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+#sidebar ul li a i {
+  width: 30px;
+  font-size: 1.2rem;
+}
+
+#sidebar ul li a span {
+  margin-left: 10px;
+  white-space: nowrap;
+}
+
+/* Toggle Button */
+.toggle-button {
+  display: none;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: #0038A8;
+  top: 10px;
+  left: 10px;
+  z-index: 1100;
+}
+
+.content {
+  width: 100%;
+}
+
+/* Main Content */
+#content {
+  margin-left: 250px;
+  padding: 30px;
+  transition: margin-left 0.3s ease;
+}
+
+#sidebar.collapsed ~ #content {
+  margin-left: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #sidebar {
+    transform: translateX(-100%);
+  }
+
+  #sidebar.show {
+    transform: translateX(0);
+  }
+
+  #content {
+    margin-left: 0 !important;
+  }
+
+  .toggle-button {
+    display: block;
+  }
+}
+
+/* Cards */
+.card {
+  border-left: 5px solid #FCD116;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.card i {
+  font-size: 2.5rem;
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.card-value {
+  font-size: 1.8rem;
+  color: #CE1126;
+}
+
+.page-title {
+  font-weight: bold;
+  color: #0038A8;
+}
+
+/* Buttons */
+.edit-btn,
+.delete-btn,
+.approve-btn,
+.deny-btn,
+.restore-btn,
+.deactivate-btn,
+.reset-btn,
+.activate-btn {
+  background-color: #0038A8;
+  color: #fff !important;
+  border-radius: 5px;
+  transition: 0.2s ease;
+}
+
+.edit-btn:hover,
+.delete-btn:hover,
+.deny-btn:hover,
+.restore-btn:hover,
+.deactivate-btn:hover,
+.reset-btn:hover,
+.activate-btn:hover {
+  background-color: #002f86;
+}
+
+.approve-btn:hover {
+  background-color: var(--secondary-color) !important;
+}
+
+/* Add Button */
+.adddocument-btn,
+.addholiday-btn {
+  color: #fff;
+  border-radius: 5px;
+  padding: 10px;
+  border: none;
+  background-color: #0038A8;
+}
+
+.adddocument-btn:hover,
+.addholiday-btn:hover {
+  background: navy;
+  color: #fff;
+}
+
+.adddocument-btn i {
+  font-size: 16px;
+}
+
+
+@media (max-width: 768px) {
+  #sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  #sidebar.show {
+    transform: translateX(0);
+  }
+
+  .toggle-button {
+    display: block;
+  }
+
+  #content {
+    margin-left: 0 !important;
+  }
+}
+
+
+.navbar-custom-active {
+  background-color: #fff;
+  border-radius: 10px;
+}
+
+.navbar-custom-active a i, .navbar-custom-active a span{
+  color: #111;
+}
+
+.navbar-custom {
+  transition: 0.2s ease;
+}
+.navbar-custom:hover {
+  background-color: navy;
+  border-radius: 10px;
+}
+
+.meeting-headline {
+  font-weight: 700;
+}
+
+
+.fc-daygrid-day {
+    cursor: pointer;
+}
+
+.fc-daygrid-day:hover {
+    transition: 0.1s ease;
+    background-color: #eef;
+}
+
+  .fc-daygrid-day.fc-day-today {
+      background-color: #c0dcfa !important;
+  }
+
+  .form-label {
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .meeting-deleteBtn {
+    background-color: #CE1126;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 15px;
+    color: #fff;
+  }
+
+   .meeting-deleteBtn i {
+    font-size: 16px;
+  }
+
+  .meeting-deleteBtn:hover {
+    transition: 0.2s ease;
+    background-color: #8f0a1a;
+  }
+
+  .meeting-saveBtn {
+    background-color: #1243a0;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 15px;
+    color: #fff;
+  }
+
+  .meeting-saveBtn i {
+    font-size: 16px;
+  }
+
+
+  .meeting-saveBtn:hover {
+    transition: 0.2s ease;
+    background-color: #082864;
+  }
+
+  .custom-hover-dropdown-active {
+    background-color: #fff;
+    border-radius: 10px;
+  }
+  
+  .custom-hover-dropdown {
+    border-radius: 10px;
+  }
+
+  .custom-hover-dropdown:hover {
+    transition: 0.2s ease;
+    background-color: #03276b;
+    border-radius: 10px;
+  }
+
+    .custom-hover-dropdown-text {
+      color: #fff;
+    }
+
+  .custom-hover-dropdown-text:hover {
+    transition: 0.2s ease;
+    color: #111;
+  }

@@ -1,0 +1,10 @@
+database name: dbschedule
+
+import the dbschedule.sql in dbschedule database
+
+how to import?
+
+you can see the tutorial here in this link:
+
+https://www.youtube.com/watch?v=jW5lrS6EUPM
+

@@ -81,12 +81,12 @@ try {
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'papermaxx99@gmail.com';
-            $mail->Password   = 'bxcccyqtkrmgxsqc'; // Gmail app password
+            $mail->Username   = 'fairechurchscheduling@gmail.com';
+            $mail->Password   = 'uvlypjetmkgjnzcq'; // Gmail app password
             $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
             $mail->Port       = 465;
 
-            $mail->setFrom('papermaxx99@gmail.com', 'Faire Church');
+            $mail->setFrom('fairechurchscheduling@gmail.com', 'Faire Church');
             $mail->addAddress($toEmail, trim(($row['firstname'] ?? '') . ' ' . ($row['lastname'] ?? '')));
             $mail->isHTML(true);
 

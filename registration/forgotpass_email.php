@@ -20,12 +20,12 @@ function sendEmailVerification($user) {
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'papermaxx99@gmail.com';
-        $mail->Password = 'bxcccyqtkrmgxsqc';
+        $mail->Username = 'fairechurchscheduling@gmail.com';
+        $mail->Password = 'uvlypjetmkgjnzcq';
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
         $mail->Port = 465;
 
-        $mail->setFrom('papermaxx99@gmail.com', 'POS');
+        $mail->setFrom('fairechurchscheduling@gmail.com', 'Faire Church Scheduling');
         $mail->addAddress($user['email']);
         $mail->isHTML(true);
         $mail->Subject = 'Reset Your Password';

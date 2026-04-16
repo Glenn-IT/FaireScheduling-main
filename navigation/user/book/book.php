@@ -1,5 +1,9 @@
 <?php 
 session_start();
+// Prevent browser caching — stops back-button re-entry after logout
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: Sat, 01 Jan 2000 00:00:00 GMT");
 if (!isset($_SESSION['userid'])) { header("Location: ../../../logout.php"); exit; }
 $userid = (int)$_SESSION['userid'];
 
@@ -279,7 +283,11 @@ $titleText = 'Book a Schedule';
             </div>
             <div class="col-md-6 mb-3">
               <label class="form-label">Other contact number</label>
-              <input type="tel" class="form-control" name="contact_phone" placeholder="09xxxxxxxxx">
+              <input type="tel" class="form-control" name="contact_phone" id="contact_phone"
+                     placeholder="09xxxxxxxxx" maxlength="11"
+                     pattern="^09\d{9}$"
+                     title="Must be an 11-digit Philippine number starting with 09">
+              <div class="invalid-feedback">Enter a valid PH number (09xxxxxxxxx, 11 digits).</div>
             </div>
           </div>
 
@@ -354,6 +362,11 @@ $titleText = 'Book a Schedule';
     // Change calendar when filter changes
     svcFilterEl.addEventListener('change', () => calendar.refetchEvents());
 
+    // Enforce digits-only on contact phone
+    document.getElementById('contact_phone').addEventListener('input', function(){
+      this.value = this.value.replace(/\D/g, '').slice(0, 11);
+    });
+
     /* ---------- Save booking ---------- */
     $('#bookingForm').on('submit', function(e){
       e.preventDefault();
@@ -370,6 +383,20 @@ $titleText = 'Book a Schedule';
         Swal.fire({icon:'error', title:'Invalid time', text:'End time must be after start time.'});
         return;
       }
+
+      // Philippine phone number validation (optional field)
+      const phone = (form.get('contact_phone') || '').trim();
+      if (phone !== '' && !/^09\d{9}$/.test(phone)) {
+        Swal.fire({icon:'error', title:'Invalid phone number', text:'Contact number must be an 11-digit Philippine number starting with 09 (e.g. 09xxxxxxxxx).'});
+        document.getElementById('contact_phone').classList.add('is-invalid');
+        return;
+      }
+      document.getElementById('contact_phone').classList.remove('is-invalid');
+
+      // Disable submit button to prevent double-submission
+      const $submitBtn = $(this).find('[type=submit]');
+      $submitBtn.prop('disabled', true).text('Submitting…');
+
       $.ajax({
         url: 'save_schedule.php',
         method: 'POST',
@@ -387,6 +414,8 @@ $titleText = 'Book a Schedule';
         }
       }).fail(function(){
         Swal.fire({ icon: 'error', title: 'Network error', text: 'Please try again.' });
+      }).always(function(){
+        $submitBtn.prop('disabled', false).text('Submit Booking');
       });
     });
 

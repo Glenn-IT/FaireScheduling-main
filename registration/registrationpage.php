@@ -48,7 +48,11 @@ session_start();
 
       <div class="form-group">
         <label for="mobile">Mobile Number</label>
-        <input type="tel" class="form-control" id="mobile" required pattern="[0-9]{11}" maxlength="11">
+        <input type="tel" class="form-control" id="mobile" required
+               placeholder="09xxxxxxxxx" maxlength="11"
+               pattern="^09\d{9}$"
+               title="Must be an 11-digit Philippine number starting with 09">
+        <small class="text-danger" id="mobileError" style="display:none;">Enter a valid PH number (09xxxxxxxxx, 11 digits).</small>
       </div>
 
       <div class="form-group">
@@ -83,16 +87,40 @@ session_start();
   <!-- Scripts -->
   <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
   <script>
+    // Set max date for birthday to today (no future dates)
+    (function() {
+      const bd = document.getElementById('birthday');
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, '0');
+      const d = String(today.getDate()).padStart(2, '0');
+      bd.max = `${y}-${m}-${d}`;
+    })();
+
     // Auto-calculate age
     document.getElementById('birthday').addEventListener('change', function () {
       const birthDate = new Date(this.value);
       const today = new Date();
+
+      // Block future dates
+      if (birthDate > today) {
+        this.setCustomValidity('Birthday cannot be a future date.');
+        document.getElementById('age').value = '';
+        return;
+      }
+      this.setCustomValidity('');
+
       let age = today.getFullYear() - birthDate.getFullYear();
       const m = today.getMonth() - birthDate.getMonth();
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
         age--;
       }
       document.getElementById('age').value = age;
+    });
+
+    // Enforce digits-only on mobile input
+    document.getElementById('mobile').addEventListener('input', function () {
+      this.value = this.value.replace(/\D/g, '').slice(0, 11);
     });
 
     // Toggle password visibility
@@ -112,6 +140,27 @@ session_start();
     document.getElementById("submitBtn").addEventListener("click", function () {
       const password = $("#password").val();
       const confirmpassword = $("#confirmpassword").val();
+      const mobile = $("#mobile").val().trim();
+      const birthday = $("#birthday").val();
+
+      // Birthday: no future dates
+      const today = new Date(); today.setHours(0,0,0,0);
+      if (!birthday) {
+        Swal.fire({ icon:'warning', title:'Birthday Required', text:'Please enter your birthday.', confirmButtonColor:'#CE1126' });
+        return;
+      }
+      if (new Date(birthday) > today) {
+        Swal.fire({ icon:'warning', title:'Invalid Birthday', text:'Birthday cannot be a future date.', confirmButtonColor:'#CE1126' });
+        return;
+      }
+
+      // PH phone validation
+      if (!/^09\d{9}$/.test(mobile)) {
+        document.getElementById('mobileError').style.display = 'block';
+        Swal.fire({ icon:'warning', title:'Invalid Mobile Number', text:'Please enter a valid 11-digit Philippine number starting with 09.', confirmButtonColor:'#CE1126' });
+        return;
+      }
+      document.getElementById('mobileError').style.display = 'none';
 
       if (password !== confirmpassword) {
         Swal.fire({

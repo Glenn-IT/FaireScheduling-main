@@ -65,16 +65,24 @@ try {
     echo json_encode(['success'=>false,'message'=>'End time must be after start time']); exit;
   }
 
-  // ---------- Overlap check ----------
-  $where = "date = :date AND NOT (time_end <= :t1 OR time_start >= :t2)";
-  $params = [':date'=>$date, ':t1'=>$timeStart, ':t2'=>$timeEnd];
-  if ($serviceID !== null) { $where .= " AND serviceID = :sid"; $params[':sid'] = $serviceID; }
-
-  $sqlOverlap = "SELECT 1 FROM schedules WHERE $where LIMIT 1";
+  // ---------- Overlap check (global — any service on same date/time) ----------
+  // A new booking conflicts if it overlaps ANY existing active booking on the same date,
+  // regardless of service type (the church has one venue).
+  $sqlOverlap = "
+    SELECT ID FROM schedules
+    WHERE date = :date
+      AND status NOT IN ('Cancelled','Canceled','Denied')
+      AND time_start < :t2
+      AND time_end   > :t1
+    LIMIT 1
+    FOR UPDATE
+  ";
+  $conn->beginTransaction();
   $st = $conn->prepare($sqlOverlap);
-  $st->execute($params);
-  if ($st->fetch()) {
-    echo json_encode(['success'=>false,'message'=>'Selected time overlaps an existing booking.']);
+  $st->execute([':date' => $date, ':t1' => $timeStart, ':t2' => $timeEnd]);
+  if ($st->fetchColumn()) {
+    $conn->rollBack();
+    echo json_encode(['success' => false, 'message' => 'That time slot overlaps an existing booking. Please choose a different time.']);
     exit;
   }
 
@@ -93,7 +101,7 @@ try {
   $ins = $conn->prepare($sqlInsert);
   $ok = $ins->execute([
     ':userID'               => $userID,
-    ':serviceID'            => $serviceID, // must not be null from UI
+    ':serviceID'            => $serviceID,
     ':date'                 => $date,
     ':time_start'           => $timeStart,
     ':time_end'             => $timeEnd,
@@ -103,9 +111,11 @@ try {
   ]);
 
   if (!$ok) {
+    $conn->rollBack();
     echo json_encode(['success'=>false,'message'=>'Database insert failed.']);
     exit;
   }
+  $conn->commit();
 
   // --------- Build notification + email ----------
   $stmtU = $conn->prepare("
@@ -143,12 +153,12 @@ try {
       $mail->isSMTP();
       $mail->Host       = 'smtp.gmail.com';
       $mail->SMTPAuth   = true;
-      $mail->Username   = 'papermaxx99@gmail.com';
-      $mail->Password   = 'bxcccyqtkrmgxsqc'; // Gmail app password
+      $mail->Username   = 'fairechurchscheduling@gmail.com';
+      $mail->Password   = 'uvlypjetmkgjnzcq';
       $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
       $mail->Port       = 465;
 
-      $mail->setFrom('papermaxx99@gmail.com', 'Faire Church Scheduling');
+      $mail->setFrom('fairechurchscheduling@gmail.com', 'Faire Church Scheduling');
       $mail->addAddress($user['email'], (string)$user['name']);
       $mail->isHTML(true);
       $mail->Subject = 'Booking Received';

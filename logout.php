@@ -16,7 +16,14 @@ if (ini_get("session.use_cookies")) {
     );
 }
 
+// Prevent browser from caching authenticated pages — stops back-button re-entry
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+header("Expires: Sat, 01 Jan 2000 00:00:00 GMT");
+
 // Redirect to login page
 header("Location: index.php");
+exit();
 exit();
 ?>

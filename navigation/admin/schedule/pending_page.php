@@ -101,6 +101,8 @@ $middlename= $_SESSION['middlename'] ?? '';
     </li>
 
     <hr>
+    <li class="p-1 navbar-custom my-2"><a href="../report/report.php"><i class="fas fa-chart-bar"></i><span> Reports</span></a></li>
+    <hr>
     <li class="p-1 navbar-custom my-2"><a href="../../logout.php"><i class="fas fa-sign-out-alt"></i><span> Logout</span></a></li>
   </ul>
 </nav>

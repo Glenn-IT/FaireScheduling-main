@@ -1,9 +1,27 @@
-<?php 
+﻿<?php 
 session_start();
+// Prevent browser caching — stops back-button re-entry after logout
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: Sat, 01 Jan 2000 00:00:00 GMT");
+
+if (!isset($_SESSION['userid'])) {
+    header("Location: ../../logout.php");
+    exit();
+}
 // Store user details in session
 $userid = $_SESSION['userid'];
 
 require '../../database/connection.php';
+
+// Load services for the search form
+try {
+    $svcStmt = $conn->query("SELECT ID, service_name FROM services ORDER BY service_name");
+    $services = $svcStmt->fetchAll(PDO::FETCH_KEY_PAIR); // [ID => service_name]
+} catch (Throwable $e) {
+    $services = [];
+}
+$pkgMap = []; // no packages table — kept for JS compatibility
 
 
 
@@ -32,6 +50,7 @@ require '../../database/connection.php';
 			<link rel="stylesheet" href="css/animate.min.css">
 			<link rel="stylesheet" href="css/owl.carousel.css">				
 			<link rel="stylesheet" href="css/main.css?<?= time(); ?>">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
 
 		<style>
 			
@@ -250,45 +269,129 @@ require '../../database/connection.php';
 						<div class="col-lg-4 col-md-6 banner-right">
 							<div class="tab-content" id="myTabContent">
 							  <div class="tab-pane fade show active" id="flight" role="tabpanel" aria-labelledby="flight-tab">
-							<form id="bookingForm" class="form-wrap" method="get" action="packages/book.php">
-							<!-- Event / Service -->
-							<select class="form-control mb-2 py-2" name="service_id" id="serviceSelect" required>
-								<option value="" hidden>Select Event</option>
-								<?php foreach ($services as $sid => $title): ?>
-								<option value="<?= (int)$sid; ?>"><?= htmlspecialchars($title); ?></option>
-								<?php endforeach; ?>
-							</select>
-							
-							<!-- Package (dependent on Event) -->
-							<select class="form-control mb-1 d-none py-2" name="package_id" id="packageSelect" disabled required>
-								<option value="">Select Package</option>
-							</select>
-							<div id="pkgError" class="text-danger small mb-2" style="display:none;"></div>
+						<form id="bookingForm" class="form-wrap" onsubmit="return handleSearchEvent(event)">
+						<!-- Event / Service -->
+						<select class="form-control mb-2 py-2" name="service_id" id="serviceSelect" required>
+							<option value="" hidden>Select Event</option>
+							<?php foreach ($services as $sid => $title): ?>
+							<option value="<?= (int)$sid; ?>"><?= htmlspecialchars($title); ?></option>
+							<?php endforeach; ?>
+						</select>
 
+						<!-- Date (no past dates) -->
+						<input type="date" class="form-control mb-2" name="date" id="date" required>
 
-							<!-- Optional: live details for chosen package -->
-							<div id="packageInfo" class="small text-dark"></div>
+						<div style="text-align:start;"><label for="timeStart" style="font-weight:600;">Time Start</label></div>
+						<input type="time" class="form-control mb-2" name="time_start" id="timeStart" required step="60">
 
-							<!-- Date (no past dates) -->
-							<input type="date" class="form-control mb-2" name="date" id="date" required>
+						<div style="text-align:start;"><label for="timeEnd" style="font-weight:600;">Time End</label></div>
+						<input type="time" class="form-control mb-2" name="time_end" id="timeEnd" required step="60">
 
-							<div style="text-align:start;"><label for="timeStart" style="font-weight:600;">Time Start</label></div>
-							<input type="time" class="form-control mb-2" name="time_start" id="timeStart" required step="60">
+						<div id="searchFormError" class="text-danger small mb-2" style="display:none;"></div>
 
-							<div style="text-align:start;"><label for="timeEnd" style="font-weight:600;">Time End</label></div>
-							<input type="time" class="form-control mb-2" name="time_end" id="timeEnd" required step="60">
-
-							<button type="submit" class="mt-3 primary-btn text-uppercase">Search Event</button>
-							</form>
-
-							  </div>
+						<button type="submit" class="mt-3 primary-btn text-uppercase">Search Event</button>
+						</form>							  </div>
 							</div>
 						</div>
 					</div>
 				</div>					
 			</section>
 			<!-- End banner Area -->
-			
+
+			<!-- ===== Booking Calendar Section ===== -->
+			<section class="booking-calendar-section" style="padding: 60px 0; background: #f8fafc;">
+				<div class="container">
+					<div class="row justify-content-center mb-4">
+						<div class="col-12 text-center">
+							<h2 style="font-weight:700; color:#1e3a8a;">Church Booking Calendar</h2>
+							<p style="color:#64748b; margin-top:8px;">Click on any event to view booking details.</p>
+							<!-- Legend -->
+							<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:12px;">
+								<span class="cal-legend" style="background:#f59e0b;">Pending</span>
+								<span class="cal-legend" style="background:#22c55e;">Approved</span>
+								<span class="cal-legend" style="background:#3b82f6;">Completed</span>
+								<span class="cal-legend" style="background:#ef4444;">Denied</span>
+								<span class="cal-legend" style="background:#6b7280;">Cancelled</span>
+							</div>
+						</div>
+					</div>
+					<div class="row justify-content-center">
+						<div class="col-lg-10 col-12">
+							<div style="background:#fff; border-radius:16px; box-shadow:0 4px 24px rgba(30,58,138,.10); padding:24px;">
+								<div id="bookingCalendar"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- Booking Detail Modal -->
+			<div id="bookingDetailModal" style="
+				display:none; position:fixed; inset:0; z-index:9999;
+				background:rgba(15,23,42,.55); backdrop-filter:blur(3px);
+				align-items:center; justify-content:center;">
+				<div style="
+					background:#fff; border-radius:16px; width:100%; max-width:460px;
+					margin:16px; box-shadow:0 24px 64px rgba(15,23,42,.22);
+					overflow:hidden; animation:fadeUp .22s ease;">
+					<!-- Modal header -->
+					<div id="modalHeader" style="padding:18px 22px 14px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:flex-start;">
+						<div>
+							<div id="modalService" style="font-size:1.2rem; font-weight:700; color:#1e3a8a;"></div>
+							<div id="modalDate"    style="color:#64748b; font-size:.92rem; margin-top:2px;"></div>
+						</div>
+						<button id="modalCloseBtn" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#64748b;line-height:1;padding:0 4px;">&times;</button>
+					</div>
+					<!-- Status badge -->
+					<div style="padding:10px 22px 0;">
+						<span id="modalStatusBadge" style="display:inline-block; padding:3px 14px; border-radius:999px; font-size:.82rem; font-weight:700; color:#fff;"></span>
+					</div>
+					<!-- Modal body -->
+					<div style="padding:14px 22px 22px;">
+						<table style="width:100%; border-collapse:collapse; font-size:.93rem;">
+							<tr>
+								<td style="padding:7px 0; color:#64748b; width:44%; vertical-align:top;"><i class="fa fa-clock-o" style="margin-right:6px;"></i>Time</td>
+								<td id="modalTime" style="padding:7px 0; font-weight:600; color:#0f172a;"></td>
+							</tr>
+							<tr>
+								<td style="padding:7px 0; color:#64748b; vertical-align:top;"><i class="fa fa-user" style="margin-right:6px;"></i>Booked by</td>
+								<td id="modalBooker" style="padding:7px 0; font-weight:600; color:#0f172a;"></td>
+							</tr>
+							<tr>
+								<td style="padding:7px 0; color:#64748b; vertical-align:top;"><i class="fa fa-envelope" style="margin-right:6px;"></i>Email</td>
+								<td id="modalEmail" style="padding:7px 0; color:#0f172a; word-break:break-word;"></td>
+							</tr>
+							<tr id="modalContactRow">
+								<td style="padding:7px 0; color:#64748b; vertical-align:top;"><i class="fa fa-phone" style="margin-right:6px;"></i>Contact Person</td>
+								<td id="modalContact" style="padding:7px 0; color:#0f172a;"></td>
+							</tr>
+							<tr id="modalPhoneRow">
+								<td style="padding:7px 0; color:#64748b; vertical-align:top;"><i class="fa fa-mobile" style="margin-right:6px;"></i>Phone</td>
+								<td id="modalPhone" style="padding:7px 0; color:#0f172a;"></td>
+							</tr>
+							<tr id="modalNotesRow">
+								<td style="padding:7px 0; color:#64748b; vertical-align:top;"><i class="fa fa-sticky-note-o" style="margin-right:6px;"></i>Notes</td>
+								<td id="modalNotes" style="padding:7px 0; color:#0f172a;"></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<style>
+			@keyframes fadeUp {
+				from { opacity:0; transform:translateY(18px); }
+				to   { opacity:1; transform:translateY(0); }
+			}
+			.cal-legend {
+				color:#fff; font-size:.78rem; font-weight:600;
+				padding:3px 12px; border-radius:999px;
+			}
+			#bookingCalendar .fc-toolbar-title { font-size: 1.1rem; font-weight: 700; }
+			#bookingCalendar .fc-event { cursor: pointer; border-radius: 6px !important; border:none !important; font-size:.82rem; }
+			#bookingCalendar .fc-daygrid-event { white-space: normal !important; }
+			</style>
+			<!-- End Booking Calendar Section -->
 
 			<!-- start footer Area -->		
   <footer class="footer-area section-gap">
@@ -305,205 +408,43 @@ require '../../database/connection.php';
 			<!-- End footer Area -->	
 
 			<script>
-// PHP → JS map: { service_id: [ {id, name, price, guest}, ... ] }
-			const pkgMap = <?=
-			json_encode($pkgMap, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT);
-			?>;
+// Search Event form — validate then redirect to book.php with service pre-selected
+function handleSearchEvent(ev) {
+  ev.preventDefault();
+  const errEl = document.getElementById('searchFormError');
+  errEl.style.display = 'none';
 
-			const serviceSelect = document.getElementById('serviceSelect');
-			const packageSelect = document.getElementById('packageSelect');
-			const packageInfo   = document.getElementById('packageInfo');
+  const svcVal   = document.getElementById('serviceSelect').value;
+  const dateVal  = document.getElementById('date').value;
+  const startVal = document.getElementById('timeStart').value;
+  const endVal   = document.getElementById('timeEnd').value;
 
-			function resetPackage() {
-			packageSelect.innerHTML = '<option value="" hidden>Select Package</option>';
-			packageSelect.disabled = true;
-			packageSelect.classList.add('d-none');
-			if (packageInfo) packageInfo.innerHTML = '';
-			}
+  const todayStr = new Date().toISOString().slice(0, 10);
 
-			serviceSelect.addEventListener('change', function () {
-			const sid = this.value;
-			resetPackage();
+  if (!svcVal)   { errEl.textContent = 'Please select an event.';           errEl.style.display='block'; return false; }
+  if (!dateVal)  { errEl.textContent = 'Please choose a date.';             errEl.style.display='block'; return false; }
+  if (dateVal < todayStr) { errEl.textContent = 'Past dates are not allowed.'; errEl.style.display='block'; return false; }
+  if (!startVal || !endVal) { errEl.textContent = 'Please set start and end times.'; errEl.style.display='block'; return false; }
+  if (endVal <= startVal)   { errEl.textContent = 'End time must be after start time.'; errEl.style.display='block'; return false; }
 
-			if (sid && pkgMap[sid] && pkgMap[sid].length) {
-				pkgMap[sid].forEach(p => {
-				const opt = document.createElement('option');
-				opt.value = p.id;
-				opt.textContent = p.name;
-				opt.dataset.price = (p.price ?? '');
-				opt.dataset.guest = (p.guest ?? '');
-				packageSelect.appendChild(opt);
-				});
-				packageSelect.disabled = false;
-				packageSelect.classList.remove('d-none');
-			}
-			});
+  // Redirect to the booking calendar with the service pre-selected
+  window.location.href = 'book/book.php?service=' + encodeURIComponent(svcVal);
+  return false;
+}
 
-			packageSelect.addEventListener('change', function () {
-			const opt = this.selectedOptions[0];
-			if (!opt || !opt.value) { if (packageInfo) packageInfo.innerHTML = ''; return; }
-
-			const price = opt.dataset.price;
-			const guest = opt.dataset.guest;
-			if (packageInfo) {
-				packageInfo.innerHTML =
-				(price ? ("<div class='row py-2'><div class='col-lg-6 col-12'>Price: " + Number(price).toLocaleString() + " PHP </div>") : '') +
-				(guest ? ("<div class='col-lg-6 col-12'>Guests: " + guest + "</div></div>") : '');
-			}
-			});
+// Prevent past dates on the date field
+document.addEventListener('DOMContentLoaded', function () {
+  const dateInput = document.getElementById('date');
+  if (dateInput) {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    dateInput.min = `${y}-${m}-${d}`;
+  }
+});
 </script>
 <script>
-// ----- UTILITIES -----
-function parseTimeToMinutes(str) {
-  if (!str) return NaN;
-  let s = String(str).trim().toLowerCase();
-  const ap = /am|pm/.test(s) ? (s.includes('pm') ? 'pm' : 'am') : null;
-  s = s.replace(/[^0-9:]/g, '');
-  let [hh, mm] = s.split(':');
-  let h = parseInt(hh || '0', 10);
-  let m = parseInt(mm || '0', 10);
-  if (ap) { if (h === 12) h = 0; if (ap === 'pm') h += 12; }
-  if (isNaN(h) || isNaN(m)) return NaN;
-  return h * 60 + m;
-}
-function to24hString(str) {
-  const mins = parseTimeToMinutes(str);
-  if (isNaN(mins)) return '';
-  const h = String(Math.floor(mins/60)).padStart(2,'0');
-  const m = String(mins%60).padStart(2,'0');
-  return `${h}:${m}`;
-}
-function todayISO() {
-  const d = new Date();
-  // lock to local midnight
-  d.setHours(0,0,0,0);
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const day = String(d.getDate()).padStart(2,'0');
-  return `${y}-${m}-${day}`;
-}
-
-// ----- ELEMENTS -----
-const form        = document.getElementById('bookingForm');
-const dateInput   = document.getElementById('date');
-const timeStart   = document.getElementById('timeStart');
-const timeEnd     = document.getElementById('timeEnd');
-const packageSel  = document.getElementById('packageSelect');
-const serviceSel  = document.getElementById('serviceSelect');
-const pkgError    = document.getElementById('pkgError');
-
-
-// ----- INIT: disable past dates -----
-dateInput.min = todayISO();
-
-// ----- TIME VALIDATION -----
-function syncEndMin() {
-  const startVal24 = to24hString(timeStart.value);
-  if (startVal24) timeEnd.min = startVal24; else timeEnd.removeAttribute('min');
-}
-function validateTimes() {
-  timeEnd.setCustomValidity('');
-  const s = parseTimeToMinutes(timeStart.value);
-  const e = parseTimeToMinutes(timeEnd.value);
-  if (!isNaN(s) && !isNaN(e) && e <= s) {
-    timeEnd.setCustomValidity('End time must be later than Start time.');
-  }
-}
-
-// ----- PACKAGE VALIDATION -----
-function validatePackage() {
-  // If the select is hidden/disabled or empty, block submit.
-  packageSel.setCustomValidity('');
-  const hasValue = packageSel && !packageSel.disabled && packageSel.value !== '';
-  if (!hasValue) {
-    packageSel.setCustomValidity('Please select a package.');
-  }
-}
-
-// Keep validations reactive
-['input','change','blur'].forEach(evt => {
-  timeStart.addEventListener(evt, () => { syncEndMin(); validateTimes(); });
-  timeEnd.addEventListener(evt, validateTimes);
-  packageSel.addEventListener(evt, validatePackage);
-  dateInput.addEventListener(evt, () => {
-    // ensure chosen date is not before today (extra guard)
-    if (dateInput.value && dateInput.value < dateInput.min) {
-      dateInput.setCustomValidity('Past dates are not allowed.');
-    } else {
-      dateInput.setCustomValidity('');
-    }
-  });
-});
-
-// ---- HARD GUARD on submit ----
-form.addEventListener('submit', (ev) => {
-  // Keep time & date constraints in sync
-  syncEndMin();
-  validateTimes();
-
-  // Build errors
-  const errors = [];
-
-  // Service selected?
-  if (!serviceSel.value) {
-    errors.push('Please select an event.');
-  }
-
-  // Package selected? (don’t rely on "required" because the select may be disabled/hidden)
-  const hasPackageValue = packageSel && !packageSel.disabled && !packageSel.classList.contains('d-none') && packageSel.value !== '';
-  if (!hasPackageValue) {
-    errors.push('Please select a package.');
-  }
-
-  // Date present and not in the past
-  if (!dateInput.value) {
-    errors.push('Please choose a date.');
-  } else if (dateInput.value < dateInput.min) {
-    errors.push('Past dates are not allowed.');
-  }
-
-  // Time logic
-  if (!timeStart.value || !timeEnd.value) {
-    errors.push('Please set both start and end times.');
-  } else if (timeEnd.validity.customError) { // set by validateTimes()
-    errors.push('End time must be later than Start time.');
-  }
-
-  // Show errors and block submit if any
-if (errors.length) {
-  ev.preventDefault();
-
-  // Inline error for package
-  if (!hasPackageValue) {
-    pkgError.textContent = 'Please select a package.';
-    pkgError.style.display = 'block';
-    packageSel.classList.add('is-invalid');
-  } else {
-    pkgError.textContent = '';
-    pkgError.style.display = 'none';
-    packageSel.classList.remove('is-invalid');
-  }
-
-  // Show native messages (date/time, etc.)
-  form.reportValidity();
-  // Optionally focus the first invalid field
-  const firstInvalid = form.querySelector(':invalid');
-  if (firstInvalid) firstInvalid.focus();
-} else {
-  // clear any prior inline error
-  pkgError.textContent = '';
-  pkgError.style.display = 'none';
-  packageSel.classList.remove('is-invalid');
-}
-
-});
-// First run
-syncEndMin();
-validateTimes();
-validatePackage();
-
-
-
  /* ---------- Notifications + Profile ---------- */
   const NOTIF_PAGE = 'schedule/schedule.php';
 
@@ -646,6 +587,97 @@ validatePackage();
 			<script src="js/jquery.nice-select.min.js"></script>					
 			<script src="js/owl.carousel.min.js"></script>							
 			<script src="js/mail-script.js"></script>	
-			<script src="js/main.js"></script>	
+			<script src="js/main.js"></script>
+
+		<!-- FullCalendar -->
+		<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+		<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			var calEl = document.getElementById('bookingCalendar');
+			var modal = document.getElementById('bookingDetailModal');
+
+			var statusColours = {
+				'Pending':   '#f59e0b',
+				'Approved':  '#22c55e',
+				'Completed': '#3b82f6',
+				'Denied':    '#ef4444',
+				'Cancelled': '#6b7280',
+				'Canceled':  '#6b7280',
+			};
+
+			var calendar = new FullCalendar.Calendar(calEl, {
+				initialView: 'dayGridMonth',
+				headerToolbar: {
+					left:   'prev,next today',
+					center: 'title',
+					right:  'dayGridMonth,timeGridWeek,listMonth'
+				},
+				height: 'auto',
+				buttonText: { today:'Today', month:'Month', week:'Week', list:'List' },
+				events: {
+					url: 'includes/get_calendar_events.php',
+					failure: function () {
+						console.warn('Could not load calendar events.');
+					}
+				},
+				eventClick: function (info) {
+					var p = info.event.extendedProps;
+
+					document.getElementById('modalService').textContent     = p.service  || 'Booking';
+					document.getElementById('modalDate').textContent        = p.date_fmt || '';
+					document.getElementById('modalTime').textContent        = p.time_start + ' – ' + p.time_end;
+					document.getElementById('modalBooker').textContent      = p.booker   || '—';
+					document.getElementById('modalEmail').textContent       = p.email    || '—';
+
+					// Contact person (optional)
+					if (p.contact) {
+						document.getElementById('modalContact').textContent = p.contact;
+						document.getElementById('modalContactRow').style.display = '';
+					} else {
+						document.getElementById('modalContactRow').style.display = 'none';
+					}
+					// Phone (optional)
+					if (p.phone) {
+						document.getElementById('modalPhone').textContent = p.phone;
+						document.getElementById('modalPhoneRow').style.display = '';
+					} else {
+						document.getElementById('modalPhoneRow').style.display = 'none';
+					}
+					// Notes (optional)
+					if (p.notes) {
+						document.getElementById('modalNotes').textContent = p.notes;
+						document.getElementById('modalNotesRow').style.display = '';
+					} else {
+						document.getElementById('modalNotesRow').style.display = 'none';
+					}
+
+					// Status badge
+					var badge = document.getElementById('modalStatusBadge');
+					badge.textContent = p.status || '';
+					badge.style.background = statusColours[p.status] || '#94a3b8';
+
+					modal.style.display = 'flex';
+				},
+
+				// Clicking a date that has no event: optionally open book page
+				dateClick: function (info) {
+					// only open if no event was clicked (eventClick fires first)
+				}
+			});
+
+			calendar.render();
+
+			// Close modal
+			document.getElementById('modalCloseBtn').addEventListener('click', function () {
+				modal.style.display = 'none';
+			});
+			modal.addEventListener('click', function (e) {
+				if (e.target === modal) modal.style.display = 'none';
+			});
+			document.addEventListener('keydown', function (e) {
+				if (e.key === 'Escape') modal.style.display = 'none';
+			});
+		});
+		</script>
 		</body>
 	</html>

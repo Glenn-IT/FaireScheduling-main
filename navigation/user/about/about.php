@@ -222,6 +222,10 @@ $developers = [
               </button>
               <div id="profileDropdown" class="profile-panel" role="menu" aria-hidden="true">
                 <div class="profile-head">Account</div>
+                <a class="profile-item py-2" role="menuitem" href="../account/profile.php">
+                  <i class="fa fa-user"></i>
+                  <span class="text-dark">My Profile</span>
+                </a>
                 <a class="profile-item py-2" role="menuitem" href="../../../logout.php">
                   <i class="fa fa-sign-out"></i>
                   <span class="text-dark">Logout</span>

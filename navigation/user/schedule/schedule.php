@@ -37,6 +37,7 @@ $sql = "
     s.time_end,
     s.other_contact_person,
     s.contact_phone,
+    s.address,
     s.notes,
     s.date_created,
     s.status,
@@ -215,6 +216,10 @@ function status_badge($status) {
 
               <div id="profileDropdown" class="profile-panel" role="menu" aria-hidden="true">
                 <div class="profile-head">Account</div>
+                <a class="profile-item py-2" role="menuitem" href="../account/profile.php">
+                  <i class="fa fa-user"></i>
+                  <span class="text-dark">My Profile</span>
+                </a>
                 <a class="profile-item py-2" role="menuitem" href="../../../logout.php">
                   <i class="fa fa-sign-out"></i>
                   <span class="text-dark">Logout</span>
@@ -303,6 +308,7 @@ function status_badge($status) {
                     data-end="<?= htmlspecialchars($tEnd, ENT_QUOTES) ?>"
                     data-ocp="<?= htmlspecialchars($b['other_contact_person'] ?? '', ENT_QUOTES) ?>"
                     data-phone="<?= htmlspecialchars($b['contact_phone'] ?? '', ENT_QUOTES) ?>"
+                    data-address="<?= htmlspecialchars($b['address'] ?? '', ENT_QUOTES) ?>"
                     data-notes="<?= htmlspecialchars($b['notes'] ?? '', ENT_QUOTES) ?>"
                     data-status="<?= htmlspecialchars($b['status'] ?? '—', ENT_QUOTES) ?>"
                   >
@@ -341,6 +347,7 @@ function status_badge($status) {
           <div class="col-md-6"><div class="notes-card"><strong>Other contact:</strong> <span id="vOcp"></span></div></div>
           <div class="col-md-6"><div class="notes-card"><strong>Contact #:</strong> <span id="vPhone"></span></div></div>
           <div class="col-md-6"><div class="notes-card"><strong>Status:</strong> <span id="vStatus"></span></div></div>
+          <div class="col-md-12"><div class="notes-card"><strong>Address:</strong> <span id="vAddress"></span></div></div>
           <div class="col-md-12">
             <div class="notes-card"><strong>Notes:</strong><div id="vNotes" style="margin-top:6px"></div></div>
           </div>
@@ -380,6 +387,7 @@ function status_badge($status) {
     $('#vTime').html((d.start||'') + (d.end ? ' – ' + d.end : ''));
     $('#vOcp').html(esc(d.ocp||'—'));
     $('#vPhone').html(esc(d.phone||'—'));
+    $('#vAddress').html(esc(d.address||'—'));
     $('#vStatus').html(esc(d.status||'—'));
     $('#vNotes').html(esc(d.notes||'No additional notes.'));
     $('#viewModal').modal('show');

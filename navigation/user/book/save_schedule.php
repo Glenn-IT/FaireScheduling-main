@@ -53,6 +53,7 @@ try {
   $timeEndRaw   = $_POST['time_end']    ?? '';
   $otherPerson  = trim((string)($_POST['other_contact_person'] ?? ''));
   $contactPhone = trim((string)($_POST['contact_phone'] ?? ''));
+  $address      = trim((string)($_POST['address'] ?? ''));
   $notes        = trim((string)($_POST['notes'] ?? ''));
 
   $timeStart = normalize_time($timeStartRaw);
@@ -90,11 +91,11 @@ try {
   $sqlInsert = "
     INSERT INTO schedules (
       userID, serviceID, date, time_start, time_end,
-      other_contact_person, contact_phone, notes,
+      other_contact_person, contact_phone, address, notes,
       date_created, status
     ) VALUES (
       :userID, :serviceID, :date, :time_start, :time_end,
-      :other_contact_person, :contact_phone, :notes,
+      :other_contact_person, :contact_phone, :address, :notes,
       NOW(), 'Pending'
     )
   ";
@@ -107,6 +108,7 @@ try {
     ':time_end'             => $timeEnd,
     ':other_contact_person' => ($otherPerson !== '') ? $otherPerson : null,
     ':contact_phone'        => ($contactPhone !== '') ? $contactPhone : null,
+    ':address'              => ($address !== '') ? $address : null,
     ':notes'                => ($notes !== '') ? $notes : null,
   ]);
 

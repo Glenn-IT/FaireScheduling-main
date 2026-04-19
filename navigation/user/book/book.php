@@ -173,6 +173,10 @@ $titleText = 'Book a Schedule';
 
               <div id="profileDropdown" class="profile-panel" role="menu" aria-hidden="true">
                 <div class="profile-head">Account</div>
+                <a class="profile-item py-2" role="menuitem" href="../account/profile.php">
+                  <i class="fa fa-user"></i>
+                  <span class="text-dark">My Profile</span>
+                </a>
                 <a class="profile-item py-2" role="menuitem" href="../../../logout.php">
                   <i class="fa fa-sign-out"></i>
                   <span class="text-dark">Logout</span>
@@ -289,6 +293,11 @@ $titleText = 'Book a Schedule';
                      title="Must be an 11-digit Philippine number starting with 09">
               <div class="invalid-feedback">Enter a valid PH number (09xxxxxxxxx, 11 digits).</div>
             </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label required">Address</label>
+            <input type="text" class="form-control" name="address" id="address" placeholder="Enter your full address" required>
           </div>
 
           <div class="mb-3">

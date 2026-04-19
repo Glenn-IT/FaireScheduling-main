@@ -209,16 +209,18 @@
 								<i class="fa fa-user-circle"></i>
 							</button>
 
-							<div id="profileDropdown" class="profile-panel" role="menu" aria-hidden="true">
-								<div class="profile-head">Account</div>
-								<a class="profile-item py-2" role="menuitem" href="../../../logout.php">
-								<i class="fa fa-sign-out"></i>
-								<span class="text-dark">Logout</span>
-								</a>
-							</div>
-							</li>
-
-						</ul>
+						<div id="profileDropdown" class="profile-panel" role="menu" aria-hidden="true">
+							<div class="profile-head">Account</div>
+							<a class="profile-item py-2" role="menuitem" href="../account/profile.php">
+							<i class="fa fa-user"></i>
+							<span class="text-dark">My Profile</span>
+							</a>
+							<a class="profile-item py-2" role="menuitem" href="../../../logout.php">
+							<i class="fa fa-sign-out"></i>
+							<span class="text-dark">Logout</span>
+							</a>
+						</div>
+						</li>						</ul>
 				      </nav><!-- #nav-menu-container -->					      		  
 					</div>
 				</div>
@@ -244,17 +246,22 @@
 			<section class="contact-page-area section-gap">
 				<div class="container">
 					<div class="row">
-						<div class="map-wrap" style="width:100%; height: 445px;" id="map"></div>
+						<!-- Google Maps embed — Santo Nino, Cagayan (Plus Code VHM9+3X8) -->
+					<div class="map-wrap" style="width:100%; height:445px; margin-bottom:30px;">
+						<iframe
+							src="https://maps.google.com/maps?q=VHM9%2B3X+Santo+Nino%2C+Cagayan&output=embed"
+							width="100%" height="445" style="border:0; border-radius:6px;"
+							allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+						</iframe>
+					</div>
 						<div class="col-lg-4 d-flex flex-column address-wrap">
 							<div class="single-contact-address d-flex flex-row">
 								<div class="icon">
 									<span class="lnr lnr-home"></span>
 								</div>
 								<div class="contact-details">
-									<h5>Piat, Cagayan</h5>
-									<p>
-										Brgy. Palusao
-									</p>
+									<h5>Santo Nino, Cagayan</h5>
+									<p>VHM9+3X8, Santo Nino, Cagayan</p>
 								</div>
 							</div>
 							<div class="single-contact-address d-flex flex-row">
@@ -263,7 +270,7 @@
 								</div>
 								<div class="contact-details">
 									<h5>+63 912 123 1234</h5>
-									<p>Mon to Fri 9am to 6 pm</p>
+									<p>Mon to Fri 9am to 6pm</p>
 								</div>
 							</div>
 							<div class="single-contact-address d-flex flex-row">
@@ -271,10 +278,10 @@
 									<span class="lnr lnr-envelope"></span>
 								</div>
 								<div class="contact-details">
-									<h5>FaireChurch@gmail.com</h5>
+									<h5>fairechurchscheduling@gmail.com</h5>
 									<p>Send us your query anytime!</p>
 								</div>
-							</div>														
+							</div>
 						</div>
 						<div class="col-lg-8">
 							<form class="form-area contact-form text-right" id="myForm" action="mail.php" method="post">
@@ -317,8 +324,7 @@
 			<script src="../js/vendor/jquery-2.2.4.min.js"></script>
 			<script src="../js/popper.min.js"></script>
 			<script src="../js/vendor/bootstrap.min.js"></script>			
-			<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBhOdIF3Y9382fqJYt5I_sswSrEw5eihAA"></script>		
- 			<script src="../js/jquery-ui.js"></script>					
+			<script src="../js/jquery-ui.js"></script>					
   			<script src="../js/easing.min.js"></script>			
 			<script src="../js/hoverIntent.js"></script>
 			<script src="../js/superfish.min.js"></script>	

@@ -177,6 +177,10 @@ $currentYear = (int)date('Y');
   <div id="printHeader" style="display:none;" class="mb-3">
     <h4 style="color:#0038A8; font-weight:800;">Faire Church Scheduling — Booking Report</h4>
     <p id="printSubtitle" style="color:#374151; font-size:.9rem;"></p>
+    <p style="color:#374151; font-size:.9rem; margin-top:4px;">
+      Prepared by: <span style="display:inline-block; min-width:220px; border-bottom:1px solid #374151;">&nbsp;</span>
+      &nbsp;&nbsp;&nbsp; Date: <span style="display:inline-block; min-width:140px; border-bottom:1px solid #374151;">&nbsp;</span>
+    </p>
   </div>
 
   <!-- ── KPI Row ──────────────────────────────────────────────────────── -->
@@ -450,6 +454,10 @@ function initDataTable() {
             <div style="margin-bottom:10px;">
               <div style="font-size:16px;font-weight:800;color:#0038A8;">Faire Church Scheduling — Booking Report</div>
               <div style="font-size:12px;color:#374151;">${subtitle}</div>
+              <div style="font-size:12px;color:#374151;margin-top:6px;">
+                Prepared by: <span style="display:inline-block;min-width:220px;border-bottom:1px solid #374151;">&nbsp;</span>
+                &nbsp;&nbsp;&nbsp; Date: <span style="display:inline-block;min-width:140px;border-bottom:1px solid #374151;">&nbsp;</span>
+              </div>
             </div>`;
           win.document.body.insertBefore(header, win.document.body.firstChild);
           const style = win.document.createElement('style');
@@ -478,12 +486,20 @@ function loadReport() {
   fetch(`get_report_data.php?year=${year}&month=${month}&service=${service}`, { cache: 'no-store' })
     .then(r => r.json())
     .then(d => {
+      if (d.error) {
+        console.error('Report error:', d.error);
+        alert('Error loading report: ' + d.error);
+        return;
+      }
       renderKPIs(d.kpis);
       initCharts(d);
       renderTable(d.details);
       initDataTable();
     })
-    .catch(() => alert('Failed to load report data.'));
+    .catch(err => {
+      console.error('Report fetch failed:', err);
+      alert('Failed to load report data. Check the console for details.');
+    });
 }
 
 // ── Print full page ───────────────────────────────────────────────────────────

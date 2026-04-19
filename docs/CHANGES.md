@@ -5,6 +5,24 @@
 
 ---
 
+## April 16, 2026 (Session 4)
+
+### 🗺️ Fix: Contact Us Page — Address, Map & Email
+
+**Request:** Update the Contact page with the correct address (VHM9+3X8, Santo Nino, Cagayan) and fix the broken map.
+
+**Changes:**
+- **Address** updated from *"Piat, Cagayan / Brgy. Palusao"* → **VHM9+3X8, Santo Nino, Cagayan**
+- **Map** was completely broken (Google Maps JS API loaded but never initialized). Replaced the blank `<div id="map">` and the dead `<script>` tag with a proper **Google Maps iframe embed** pointing to Plus Code `VHM9+3X8 Santo Nino, Cagayan`
+- **Email** updated from `FaireChurch@gmail.com` → **fairechurchscheduling@gmail.com**
+
+**Files changed:**
+| File | Change |
+|------|--------|
+| `navigation/user/contact/contact.php` | Fixed address, replaced broken map with iframe embed, updated email, removed dead Google Maps JS API script tag |
+
+---
+
 ## April 16, 2026 (Session 3)
 
 ### 📊 Feature: Admin Reports Page

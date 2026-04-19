@@ -202,7 +202,7 @@ $(function () {
     buttons: [
       {
         extend: 'print',
-        text: '<i class="fas fa-print me-2" style="font-size: 18px;"></i>Print list',
+        text: '<i class="fas fa-print me-2"></i>Print All',
         className: 'btn btn-dark',
         title: '',
         exportOptions: { columns: ':not(.no-export)' },
@@ -210,18 +210,57 @@ $(function () {
           const header = win.document.createElement('div');
           header.innerHTML = '<div style="font-size:14px;font-weight:600;margin:0 0 8px;">Completed Schedules</div>';
           win.document.body.insertBefore(header, win.document.body.firstChild);
-
-          const css = `
-@page { size: A4 landscape; margin: 12mm; }
-body { font-size: 12px !important; -webkit-print-color-adjust: exact; }
-table { width: 100% !important; }
-table.dataTable thead th, table.dataTable tbody td { padding: 6px 8px !important; }
-          `;
-          const head = win.document.head || win.document.getElementsByTagName('head')[0];
+          const css = `@page{size:A4 landscape;margin:12mm;}body{font-size:12px!important;}table{width:100%!important;}table.dataTable thead th,table.dataTable tbody td{padding:6px 8px!important;}`;
           const style = win.document.createElement('style');
           style.type = 'text/css';
           style.appendChild(win.document.createTextNode(css));
-          head.appendChild(style);
+          (win.document.head || win.document.getElementsByTagName('head')[0]).appendChild(style);
+        }
+      },
+      {
+        extend: 'print',
+        text: '<i class="fas fa-print me-2"></i>Print Mass',
+        className: 'btn btn-info',
+        title: '',
+        exportOptions: {
+          columns: ':not(.no-export)',
+          rows: function(idx) {
+            const d = table.row(idx).data();
+            return d && (d.service_name || '').toLowerCase() === 'mass';
+          }
+        },
+        customize: function (win) {
+          const header = win.document.createElement('div');
+          header.innerHTML = '<div style="font-size:14px;font-weight:600;margin:0 0 8px;">Completed Schedules — Mass</div>';
+          win.document.body.insertBefore(header, win.document.body.firstChild);
+          const css = `@page{size:A4 landscape;margin:12mm;}body{font-size:12px!important;}table{width:100%!important;}table.dataTable thead th,table.dataTable tbody td{padding:6px 8px!important;}`;
+          const style = win.document.createElement('style');
+          style.type = 'text/css';
+          style.appendChild(win.document.createTextNode(css));
+          (win.document.head || win.document.getElementsByTagName('head')[0]).appendChild(style);
+        }
+      },
+      {
+        extend: 'print',
+        text: '<i class="fas fa-print me-2"></i>Print Wedding',
+        className: 'btn btn-warning',
+        title: '',
+        exportOptions: {
+          columns: ':not(.no-export)',
+          rows: function(idx) {
+            const d = table.row(idx).data();
+            return d && (d.service_name || '').toLowerCase() === 'wedding';
+          }
+        },
+        customize: function (win) {
+          const header = win.document.createElement('div');
+          header.innerHTML = '<div style="font-size:14px;font-weight:600;margin:0 0 8px;">Completed Schedules — Wedding</div>';
+          win.document.body.insertBefore(header, win.document.body.firstChild);
+          const css = `@page{size:A4 landscape;margin:12mm;}body{font-size:12px!important;}table{width:100%!important;}table.dataTable thead th,table.dataTable tbody td{padding:6px 8px!important;}`;
+          const style = win.document.createElement('style');
+          style.type = 'text/css';
+          style.appendChild(win.document.createTextNode(css));
+          (win.document.head || win.document.getElementsByTagName('head')[0]).appendChild(style);
         }
       }
     ],
@@ -345,6 +384,18 @@ function renderCalendar(selected){
 
   fcCal.render();
 }
+
+// ── Auto-update: cancel overdue pending, complete overdue approved ──
+(function autoUpdateSchedules() {
+  fetch('./auto_update_schedules.php')
+    .then(r => r.json())
+    .then(data => {
+      if (data.cancelled > 0 || data.completed > 0) {
+        if (typeof table !== 'undefined' && table) table.ajax.reload(null, false);
+      }
+    })
+    .catch(() => {});
+})();
 </script>
 </body>
 </html>

@@ -158,6 +158,7 @@ $middlename= $_SESSION['middlename'] ?? '';
           <dt class="col-sm-3">Mobile</dt><dd class="col-sm-9" id="m_mobile"></dd>
           <dt class="col-sm-3">Other contact</dt><dd class="col-sm-9" id="m_ocp"></dd>
           <dt class="col-sm-3">Other contact no.</dt><dd class="col-sm-9" id="m_ocp_phone"></dd>
+          <dt class="col-sm-3">Address</dt><dd class="col-sm-9" id="m_address"></dd>
           <dt class="col-sm-3">Date</dt><dd class="col-sm-9" id="m_date"></dd>
           <dt class="col-sm-3">Time</dt><dd class="col-sm-9" id="m_time"></dd>
           <dt class="col-sm-3">Created</dt><dd class="col-sm-9" id="m_created"></dd>
@@ -222,28 +223,65 @@ $(function () {
     buttons: [
       {
         extend: 'print',
-        text: '<i class="fas fa-print me-2" style="font-size: 18px;"></i>Print list',
+        text: '<i class="fas fa-print me-2"></i>Print All',
         className: 'btn btn-dark',
-        title: '', // disable default big title
-        exportOptions: { columns: ':not(.no-export)' }, // exclude Actions
+        title: '',
+        exportOptions: { columns: ':not(.no-export)' },
         customize: function (win) {
-          // Inject a small custom title
           const header = win.document.createElement('div');
           header.innerHTML = '<div style="font-size:14px;font-weight:600;margin:0 0 8px;">Approved Schedules</div>';
           win.document.body.insertBefore(header, win.document.body.firstChild);
-
-          // Tight print CSS
-          const css = `
-@page { size: A4 landscape; margin: 12mm; }
-body { font-size: 12px !important; -webkit-print-color-adjust: exact; }
-table { width: 100% !important; }
-table.dataTable thead th, table.dataTable tbody td { padding: 6px 8px !important; }
-          `;
-          const head = win.document.head || win.document.getElementsByTagName('head')[0];
+          const css = `@page{size:A4 landscape;margin:12mm;}body{font-size:12px!important;}table{width:100%!important;}table.dataTable thead th,table.dataTable tbody td{padding:6px 8px!important;}`;
           const style = win.document.createElement('style');
           style.type = 'text/css';
           style.appendChild(win.document.createTextNode(css));
-          head.appendChild(style);
+          (win.document.head || win.document.getElementsByTagName('head')[0]).appendChild(style);
+        }
+      },
+      {
+        extend: 'print',
+        text: '<i class="fas fa-print me-2"></i>Print Mass',
+        className: 'btn btn-info',
+        title: '',
+        exportOptions: {
+          columns: ':not(.no-export)',
+          rows: function(idx) {
+            const d = table.row(idx).data();
+            return d && (d.service_name || '').toLowerCase() === 'mass';
+          }
+        },
+        customize: function (win) {
+          const header = win.document.createElement('div');
+          header.innerHTML = '<div style="font-size:14px;font-weight:600;margin:0 0 8px;">Approved Schedules — Mass</div>';
+          win.document.body.insertBefore(header, win.document.body.firstChild);
+          const css = `@page{size:A4 landscape;margin:12mm;}body{font-size:12px!important;}table{width:100%!important;}table.dataTable thead th,table.dataTable tbody td{padding:6px 8px!important;}`;
+          const style = win.document.createElement('style');
+          style.type = 'text/css';
+          style.appendChild(win.document.createTextNode(css));
+          (win.document.head || win.document.getElementsByTagName('head')[0]).appendChild(style);
+        }
+      },
+      {
+        extend: 'print',
+        text: '<i class="fas fa-print me-2"></i>Print Wedding',
+        className: 'btn btn-warning',
+        title: '',
+        exportOptions: {
+          columns: ':not(.no-export)',
+          rows: function(idx) {
+            const d = table.row(idx).data();
+            return d && (d.service_name || '').toLowerCase() === 'wedding';
+          }
+        },
+        customize: function (win) {
+          const header = win.document.createElement('div');
+          header.innerHTML = '<div style="font-size:14px;font-weight:600;margin:0 0 8px;">Approved Schedules — Wedding</div>';
+          win.document.body.insertBefore(header, win.document.body.firstChild);
+          const css = `@page{size:A4 landscape;margin:12mm;}body{font-size:12px!important;}table{width:100%!important;}table.dataTable thead th,table.dataTable tbody td{padding:6px 8px!important;}`;
+          const style = win.document.createElement('style');
+          style.type = 'text/css';
+          style.appendChild(win.document.createTextNode(css));
+          (win.document.head || win.document.getElementsByTagName('head')[0]).appendChild(style);
         }
       }
     ],
@@ -343,6 +381,7 @@ function fillModal(r){
   $('#m_mobile').text(r.mobilenumber || '');
   $('#m_ocp').text(r.other_contact_person || '');
   $('#m_ocp_phone').text(r.contact_phone || '');
+  $('#m_address').text(r.address || '—');
   $('#m_date').text(niceDate);
   $('#m_time').text(niceTimeRange);
   $('#m_created').text(niceCreated);
@@ -435,6 +474,18 @@ function completeSchedule(id){
     });
   });
 }
+
+// ── Auto-update: cancel overdue pending, complete overdue approved ──
+(function autoUpdateSchedules() {
+  fetch('./auto_update_schedules.php')
+    .then(r => r.json())
+    .then(data => {
+      if (data.cancelled > 0 || data.completed > 0) {
+        if (typeof table !== 'undefined' && table) table.ajax.reload(null, false);
+      }
+    })
+    .catch(() => {});
+})();
 </script>
 </body>
 </html>

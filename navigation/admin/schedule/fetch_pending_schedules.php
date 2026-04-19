@@ -14,6 +14,7 @@ if (!in_array($status, $allowed, true)) { $status = 'Pending'; }
 $sql = "
   SELECT 
     s.ID, s.userID, s.serviceID, s.date, s.time_start, s.time_end, s.date_created, s.status,
+    s.other_contact_person, s.contact_phone, s.address, s.notes,
     u.lastname, u.firstname, u.middlename, u.mobilenumber, u.email,
     sv.service_name, sv.description AS service_description
   FROM schedules s

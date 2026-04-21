@@ -207,18 +207,18 @@ $titleText = 'Book a Schedule';
   </section>
 
   <!-- Booking / Calendar -->
-  <section class="section-gap">
+  <section class="section-gap" style="background:#f8fafc;">
     <div class="container">
       <div class="row g-3 align-items-end mb-3">
         <div class="col-md-6">
-          <h4 class="mb-1">Pick your date & time</h4>
+          <h4 class="mb-1">Pick your date &amp; time</h4>
           <small class="text-muted">Existing bookings are shown as busy. Click a day to propose a time window.</small>
         </div>
 
         <!-- Service Filter -->
-        <div class="col-md-6 text-md-end" style="justify-content: end; align-items: end; display: flex;">
-          <label for="serviceFilter" class="form-label mb-1">Service Type</label>
-          <select id="serviceFilter" class="form-select d-inline-block" style="max-width: 320px;">
+        <div class="col-md-6 text-md-end" style="justify-content:end; align-items:end; display:flex;">
+          <label for="serviceFilter" class="form-label mb-1 me-2">Service Type</label>
+          <select id="serviceFilter" class="form-select d-inline-block" style="max-width:320px;">
             <option value="">All Services</option>
             <?php foreach ($services as $svc): ?>
               <option value="<?= (int)$svc['id']; ?>" <?= $sid===(int)$svc['id'] ? 'selected' : '' ?>>
@@ -229,7 +229,17 @@ $titleText = 'Book a Schedule';
         </div>
       </div>
 
-      <div id="calendar"></div>
+      <!-- Legend (matching user_index) -->
+      <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:16px;">
+        <span class="cal-legend" style="background:#f59e0b; color:#fff; font-size:.78rem; font-weight:600; padding:3px 12px; border-radius:999px;">Pending</span>
+        <span class="cal-legend" style="background:#22c55e; color:#fff; font-size:.78rem; font-weight:600; padding:3px 12px; border-radius:999px;">Approved</span>
+        <span class="cal-legend" style="background:#3b82f6; color:#fff; font-size:.78rem; font-weight:600; padding:3px 12px; border-radius:999px;">Completed</span>
+        <span class="cal-legend" style="background:#ef4444; color:#fff; font-size:.78rem; font-weight:600; padding:3px 12px; border-radius:999px;">Denied</span>
+      </div>
+
+      <div style="background:#fff; border-radius:16px; box-shadow:0 4px 24px rgba(30,58,138,.10); padding:24px;">
+        <div id="calendar"></div>
+      </div>
     </div>
   </section>
 

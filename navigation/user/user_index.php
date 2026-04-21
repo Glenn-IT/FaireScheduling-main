@@ -53,23 +53,22 @@ $pkgMap = []; // no packages table — kept for JS compatibility
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css">
 
 		<style>
-			
-    /* Bell + dropdown */
+			/* ── reused from book.php ── */
     .nav-notif { position: relative; margin-left: .5rem; }
     .notif-btn{
       background:transparent; border:0; color:#fff; font-size:18px; cursor:pointer;
       position:relative; padding:.25rem .35rem; line-height:1;
+      height:40px; display:grid; place-items:center; border-radius:999px;
     }
     .notif-badge{
-      position:absolute; top:-2px; right:-2px; min-width:18px; padding:2px 6px;
+      position:absolute; top:3px; right:3px; min-width:18px; padding:2px 6px;
       background:#ef4444; color:#fff; border-radius:999px; font-size:11px; font-weight:700;
       box-shadow:0 1px 0 rgba(0,0,0,.15);
     }
     .notif-panel{
-      display:none; position:absolute; right:0; top:36px; width:340px; max-height:420px; overflow:auto;
+      display:none; position:absolute; right:0; top:40px; width:340px; max-height:420px; overflow:auto;
       background:#fff; color:#0f172a; border:1px solid #e5e7eb; border-radius:12px;
-      box-shadow:0 18px 40px rgba(2,6,23,.18); z-index:1000;
-      overflow-x:hidden;
+      box-shadow:0 18px 40px rgba(2,6,23,.18); z-index:1000; overflow-x:hidden;
     }
     .notif-panel.show{ display:block; }
     .notif-head{
@@ -84,27 +83,18 @@ $pkgMap = []; // no packages table — kept for JS compatibility
       display:flex; gap:10px; padding:10px; border-radius:10px; cursor:pointer;
       border:1px solid transparent;
     }
-    button:focus {
-      outline: none;
-    }
     .notif-item:hover{ background:#f8fafc; border-color:#e5e7eb; }
     .notif-icon{
       min-width:28px; height:28px; display:inline-grid; place-items:center;
-      border-radius:8px; background:#eef2ff; color:#1e3a8a;
-      flex:0 0 28px;
+      border-radius:8px; background:#eef2ff; color:#1e3a8a; flex:0 0 28px;
     }
     .notif-body{ flex:1; min-width:0; }
-    .notif-title{
-      font-weight:700;
-      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-    }
+    .notif-title{ font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .notif-msg{
       color:#475569; font-size:.92rem;
       overflow:hidden; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2;
     }
-    @supports not (-webkit-line-clamp:2) {
-      .notif-msg{ white-space:nowrap; text-overflow:ellipsis; }
-    }
+    @supports not (-webkit-line-clamp:2) { .notif-msg{ white-space:nowrap; text-overflow:ellipsis; } }
     .notif-time{ color:#64748b; font-size:.82rem; margin-top:2px; }
     .notif-empty{ padding:20px; text-align:center; color:#64748b; }
     .notif-footer{
@@ -116,73 +106,71 @@ $pkgMap = []; // no packages table — kept for JS compatibility
     .nav-profile { position: relative; margin-left: .5rem; }
     .profile-btn{
       background:transparent; border:0; color:#fff; font-size:18px; cursor:pointer;
-      width:34px; height:34px; border-radius:999px; display:grid; place-items:center;
+      width:40px; height:40px; border-radius:999px; display:grid; place-items:center;
     }
-    .profile-btn:focus{ outline: none; outline-offset:2px; }
-
+    .profile-btn:focus{ outline:none; }
     .profile-panel{
-      display:none; position:absolute; right:0; top:36px; width:200px;
+      display:none; position:absolute; right:0; top:40px; width:200px;
       background:#fff; color:#0f172a; border:1px solid #e5e7eb; border-radius:12px;
       box-shadow:0 18px 40px rgba(2,6,23,.18); z-index:1000; overflow:hidden;
     }
     .profile-panel.show{ display:block; }
-    .profile-head{
-      padding:10px 12px; font-weight:700; background:#f8fafc; border-bottom:1px solid #e5e7eb;
-    }
-    .profile-item{
-      display:flex; align-items:center; gap:.55rem;
-      padding:10px 12px; text-decoration:none; color:#0f172a;
-    }
+    .profile-head{ padding:10px 12px; font-weight:700; background:#f8fafc; border-bottom:1px solid #e5e7eb; }
+    .profile-item{ display:flex; align-items:center; gap:.55rem; padding:10px 12px; text-decoration:none; color:#0f172a; }
     .profile-item i{ width:18px; text-align:center; opacity:.9; }
     .profile-item:hover{ background:#f8fafc; }
 
-    /* ===== Align main nav, bell, and profile icon ===== */
-#nav-menu-container > ul.nav-menu{
-  /* cancel the theme's floats and use flex for clean centering */
-  display:flex;
-  align-items:center;
-  margin:0;
-}
-#nav-menu-container > ul.nav-menu > li{
-  float:none;                 /* override template */
-  display:flex;
-  align-items:center;
-}
+    /* nav alignment */
+    #nav-menu-container > ul.nav-menu{ display:flex; align-items:center; margin:0; }
+    #nav-menu-container > ul.nav-menu > li{ float:none; display:flex; align-items:center; }
+    #nav-menu-container .nav-menu > li > a{ display:flex; align-items:center; height:40px; padding:0 8px; line-height:1; }
+    .nav-notif{ margin-left:6px; }
+    .nav-profile{ margin-left:6px; }
+    button:focus{ outline:none; }
+    @media (max-width:991px){ #nav-menu-container > ul.nav-menu{ gap:14px; } }
 
-/* make links the same height as the icon buttons */
-#nav-menu-container .nav-menu > li > a{
-  display:flex;
-  align-items:center;
-  height:40px;                /* keep in sync with buttons below */
-  padding:0 8px;
-  line-height:1;              /* avoid baseline wobble */
-}
+    /* ── Banner search card ── */
+    .banner-search-card{
+      background:rgba(255,255,255,0.97);
+      border-radius:16px;
+      box-shadow:0 8px 40px rgba(15,23,42,.22);
+      padding:28px 28px 22px;
+    }
+    .banner-search-card .card-title{
+      font-size:1.05rem; font-weight:700; color:#1e3a8a; margin-bottom:18px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .banner-search-card .form-label{ font-size:.82rem; font-weight:600; color:#374151; margin-bottom:3px; }
+    .banner-search-card .form-control,
+    .banner-search-card .form-select{ border-radius:8px; border:1px solid #cbd5e1; font-size:.9rem; }
+    .banner-search-card .btn-search{
+      background:linear-gradient(135deg,#1e3a8a,#2563eb);
+      color:#fff; border:none; border-radius:10px; font-weight:700;
+      padding:10px 0; width:100%; font-size:.95rem; letter-spacing:.02em;
+      transition:opacity .2s;
+    }
+    .banner-search-card .btn-search:hover{ opacity:.88; }
 
-/* bell + profile: same box size & centering */
-.nav-notif .notif-btn,
-.nav-profile .profile-btn{
-  height:40px;
-  display:grid;
-  place-items:center;
-  border-radius:999px;
-  padding:0;
-}
+    /* ── Uniform FullCalendar card (both calendars) ── */
+    .fc-card{
+      background:#fff; border-radius:16px;
+      box-shadow:0 4px 24px rgba(30,58,138,.10);
+      padding:24px;
+    }
+    .fc-card .fc-toolbar-title{ font-size:1.1rem; font-weight:700; }
+    .fc-card .fc-event{ cursor:pointer; border-radius:6px !important; border:none !important; font-size:.82rem; }
+    .fc-card .fc-daygrid-event{ white-space:normal !important; }
 
-/* badge position after the size change */
-.nav-notif .notif-badge{
-  top:3px;
-  right:3px;
-}
+    /* Calendar legend */
+    .cal-legend{
+      color:#fff; font-size:.78rem; font-weight:600;
+      padding:3px 12px; border-radius:999px;
+    }
 
-/* tighten the right-side spacing a bit */
-.nav-notif{ margin-left:6px; }
-.nav-profile{ margin-left:6px; }
-
-/* optional: keep things tidy on narrow viewports */
-@media (max-width: 991px){
-  #nav-menu-container > ul.nav-menu{ gap:14px; }
-}
-
+    @keyframes fadeUp{
+      from{opacity:0;transform:translateY(18px);}
+      to{opacity:1;transform:translateY(0);}
+    }
 		</style>
 		</head>
 		<body>	
@@ -267,34 +255,43 @@ $pkgMap = []; // no packages table — kept for JS compatibility
                 <p class="text-white">
                     Book your wedding, christening, or other church services online and secure the perfect date and time.
                 </p>
-                <a href="#" class="primary-btn text-uppercase">Book Now</a>
+                <a href="book/book.php" class="primary-btn text-uppercase">Book Now</a>
             </div>
 
 						<div class="col-lg-4 col-md-6 banner-right">
-							<div class="tab-content" id="myTabContent">
-							  <div class="tab-pane fade show active" id="flight" role="tabpanel" aria-labelledby="flight-tab">
-						<form id="bookingForm" class="form-wrap" onsubmit="return handleSearchEvent(event)">
-						<!-- Event / Service -->
-						<select class="form-control mb-2 py-2" name="service_id" id="serviceSelect" required>
-							<option value="" hidden>Select Event</option>
-							<?php foreach ($services as $sid => $title): ?>
-							<option value="<?= (int)$sid; ?>"><?= htmlspecialchars($title); ?></option>
-							<?php endforeach; ?>
-						</select>
-
-						<!-- Date (no past dates) -->
-						<input type="date" class="form-control mb-2" name="date" id="date" required>
-
-						<div style="text-align:start;"><label for="timeStart" style="font-weight:600;">Time Start</label></div>
-						<input type="time" class="form-control mb-2" name="time_start" id="timeStart" required step="60">
-
-						<div style="text-align:start;"><label for="timeEnd" style="font-weight:600;">Time End</label></div>
-						<input type="time" class="form-control mb-2" name="time_end" id="timeEnd" required step="60">
-
-						<div id="searchFormError" class="text-danger small mb-2" style="display:none;"></div>
-
-						<button type="submit" class="mt-3 primary-btn text-uppercase">Search Event</button>
-						</form>							  </div>
+							<div class="banner-search-card">
+								<div class="card-title">
+									<i class="fa fa-calendar-check-o"></i> Quick Search
+								</div>
+								<form id="bookingForm" onsubmit="return handleSearchEvent(event)">
+									<div class="mb-3">
+										<label class="form-label">Select Event</label>
+										<select class="form-control" name="service_id" id="serviceSelect" required>
+											<option value="" hidden>— Choose an event —</option>
+											<?php foreach ($services as $sid => $title): ?>
+											<option value="<?= (int)$sid; ?>"><?= htmlspecialchars($title); ?></option>
+											<?php endforeach; ?>
+										</select>
+									</div>
+									<div class="mb-3">
+										<label class="form-label">Date</label>
+										<input type="date" class="form-control" name="date" id="date" required>
+									</div>
+									<div class="row mb-3">
+										<div class="col-6">
+											<label class="form-label">Time Start</label>
+											<input type="time" class="form-control" name="time_start" id="timeStart" required step="60">
+										</div>
+										<div class="col-6">
+											<label class="form-label">Time End</label>
+											<input type="time" class="form-control" name="time_end" id="timeEnd" required step="60">
+										</div>
+									</div>
+									<div id="searchFormError" class="text-danger small mb-2" style="display:none;"></div>
+									<button type="submit" class="btn-search">
+										<i class="fa fa-search me-1"></i> Search Event
+									</button>
+								</form>
 							</div>
 						</div>
 					</div>
@@ -303,7 +300,7 @@ $pkgMap = []; // no packages table — kept for JS compatibility
 			<!-- End banner Area -->
 
 			<!-- ===== Booking Calendar Section ===== -->
-			<section class="booking-calendar-section" style="padding: 60px 0; background: #f8fafc;">
+			<section class="booking-calendar-section" style="padding:60px 0; background:#f8fafc;">
 				<div class="container">
 					<div class="row justify-content-center mb-4">
 						<div class="col-12 text-center">
@@ -315,13 +312,12 @@ $pkgMap = []; // no packages table — kept for JS compatibility
 								<span class="cal-legend" style="background:#22c55e;">Approved</span>
 								<span class="cal-legend" style="background:#3b82f6;">Completed</span>
 								<span class="cal-legend" style="background:#ef4444;">Denied</span>
-								<span class="cal-legend" style="background:#6b7280;">Cancelled</span>
 							</div>
 						</div>
 					</div>
 					<div class="row justify-content-center">
 						<div class="col-lg-10 col-12">
-							<div style="background:#fff; border-radius:16px; box-shadow:0 4px 24px rgba(30,58,138,.10); padding:24px;">
+							<div class="fc-card">
 								<div id="bookingCalendar"></div>
 							</div>
 						</div>
@@ -383,17 +379,10 @@ $pkgMap = []; // no packages table — kept for JS compatibility
 			</div>
 
 			<style>
-			@keyframes fadeUp {
-				from { opacity:0; transform:translateY(18px); }
-				to   { opacity:1; transform:translateY(0); }
+			@keyframes fadeUp{
+				from{opacity:0;transform:translateY(18px);}
+				to{opacity:1;transform:translateY(0);}
 			}
-			.cal-legend {
-				color:#fff; font-size:.78rem; font-weight:600;
-				padding:3px 12px; border-radius:999px;
-			}
-			#bookingCalendar .fc-toolbar-title { font-size: 1.1rem; font-weight: 700; }
-			#bookingCalendar .fc-event { cursor: pointer; border-radius: 6px !important; border:none !important; font-size:.82rem; }
-			#bookingCalendar .fc-daygrid-event { white-space: normal !important; }
 			</style>
 			<!-- End Booking Calendar Section -->
 

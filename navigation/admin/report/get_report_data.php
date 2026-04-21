@@ -40,12 +40,13 @@ if ($svcID > 0) {
 
 try {
     $stmt = $conn->prepare(
-        "SELECT COUNT(*) AS total,
-            COALESCE(SUM(s.status = 'Approved'),  0) AS approved,
-            COALESCE(SUM(s.status = 'Pending'),   0) AS pending,
-            COALESCE(SUM(s.status IN ('Cancelled','Canceled')), 0) AS cancelled,
-            COALESCE(SUM(s.status = 'Denied'),    0) AS denied,
-            COALESCE(SUM(s.status = 'Completed'), 0) AS completed
+        "SELECT
+            COUNT(*) AS total,
+            COALESCE(SUM(CASE WHEN s.status = 'Approved'                           THEN 1 ELSE 0 END), 0) AS approved,
+            COALESCE(SUM(CASE WHEN s.status = 'Pending'                            THEN 1 ELSE 0 END), 0) AS pending,
+            COALESCE(SUM(CASE WHEN s.status IN ('Cancelled','Canceled')            THEN 1 ELSE 0 END), 0) AS cancelled,
+            COALESCE(SUM(CASE WHEN s.status = 'Denied'                             THEN 1 ELSE 0 END), 0) AS denied,
+            COALESCE(SUM(CASE WHEN s.status = 'Completed'                          THEN 1 ELSE 0 END), 0) AS completed
          FROM schedules s $where"
     );
     $stmt->execute($params);

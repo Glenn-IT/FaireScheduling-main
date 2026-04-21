@@ -19,10 +19,6 @@ $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 // For the filter dropdowns (initial load)
 $allServices = $conn->query("SELECT ID, service_name FROM services ORDER BY service_name")
                     ->fetchAll(PDO::FETCH_ASSOC);
-$years = $conn->query("SELECT DISTINCT YEAR(date) yr FROM schedules ORDER BY yr DESC")
-              ->fetchAll(PDO::FETCH_COLUMN);
-if (empty($years)) $years = [(int)date('Y')];
-$currentYear = (int)date('Y');
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -133,28 +129,15 @@ $currentYear = (int)date('Y');
   <div class="filter-bar no-print">
     <div class="row g-2 align-items-end">
       <div class="col-sm-3 col-6">
-        <label class="form-label mb-1" style="font-size:.85rem; font-weight:600;">Year</label>
-        <select id="filterYear" class="form-select form-select-sm">
-          <?php foreach ($years as $y): ?>
-            <option value="<?= (int)$y ?>" <?= (int)$y === $currentYear ? 'selected' : '' ?>><?= (int)$y ?></option>
-          <?php endforeach; ?>
-        </select>
+        <label class="form-label mb-1" style="font-size:.85rem; font-weight:600;"><i class="fas fa-calendar-day me-1"></i>From</label>
+        <input type="date" id="filterFrom" class="form-control form-control-sm" value="<?= date('Y-m-01') ?>">
       </div>
       <div class="col-sm-3 col-6">
-        <label class="form-label mb-1" style="font-size:.85rem; font-weight:600;">Month</label>
-        <select id="filterMonth" class="form-select form-select-sm">
-          <option value="0">All Months</option>
-          <?php
-          $months = ['January','February','March','April','May','June',
-                     'July','August','September','October','November','December'];
-          foreach ($months as $mi => $mn):
-          ?>
-            <option value="<?= $mi+1 ?>" <?= ($mi+1) === (int)date('n') ? 'selected' : '' ?>><?= $mn ?></option>
-          <?php endforeach; ?>
-        </select>
+        <label class="form-label mb-1" style="font-size:.85rem; font-weight:600;"><i class="fas fa-calendar-day me-1"></i>To</label>
+        <input type="date" id="filterTo" class="form-control form-control-sm" value="<?= date('Y-m-d') ?>">
       </div>
       <div class="col-sm-3 col-6">
-        <label class="form-label mb-1" style="font-size:.85rem; font-weight:600;">Service</label>
+        <label class="form-label mb-1" style="font-size:.85rem; font-weight:600;"><i class="fas fa-concierge-bell me-1"></i>Service</label>
         <select id="filterService" class="form-select form-select-sm">
           <option value="0">All Services</option>
           <?php foreach ($allServices as $sv): ?>
@@ -432,7 +415,8 @@ function esc(s) {
 
 // ── DataTable init ────────────────────────────────────────────────────────────
 function initDataTable() {
-  if (dtTable) { dtTable.destroy(); }
+  // NOTE: dtTable.destroy() must be called BEFORE renderTable() fills tbody,
+  // otherwise destroy() wipes out the freshly rendered rows.
   dtTable = $('#reportTable').DataTable({
     responsive: true,
     order: [[4, 'desc']],
@@ -471,19 +455,27 @@ function initDataTable() {
 
 // ── Load data ─────────────────────────────────────────────────────────────────
 function loadReport() {
-  const year    = document.getElementById('filterYear').value;
-  const month   = document.getElementById('filterMonth').value;
-  const service = document.getElementById('filterService').value;
+  const dateFrom = document.getElementById('filterFrom').value;
+  const dateTo   = document.getElementById('filterTo').value;
+  const service  = document.getElementById('filterService').value;
+
+  if (!dateFrom || !dateTo) {
+    alert('Please select both From and To dates.');
+    return;
+  }
+  if (dateTo < dateFrom) {
+    alert('"To" date must be on or after "From" date.');
+    return;
+  }
 
   // Update print subtitle
-  const monthNames = ['','January','February','March','April','May','June',
-                      'July','August','September','October','November','December'];
-  const svcSel = document.getElementById('filterService');
+  const svcSel  = document.getElementById('filterService');
   const svcName = svcSel.options[svcSel.selectedIndex].text;
-  const subtitle = `Year: ${year}  |  Month: ${+month === 0 ? 'All' : monthNames[+month]}  |  Service: ${+service === 0 ? 'All' : svcName}`;
+  const fmtDate = d => { const [y,m,day]=d.split('-'); return `${m}/${day}/${y}`; };
+  const subtitle = `From: ${fmtDate(dateFrom)}  →  To: ${fmtDate(dateTo)}  |  Service: ${+service === 0 ? 'All' : svcName}`;
   document.getElementById('printSubtitle').textContent = subtitle;
 
-  fetch(`get_report_data.php?year=${year}&month=${month}&service=${service}`, { cache: 'no-store' })
+  fetch(`get_report_data.php?date_from=${dateFrom}&date_to=${dateTo}&service=${service}`, { cache: 'no-store' })
     .then(r => r.json())
     .then(d => {
       if (d.error) {
@@ -493,6 +485,8 @@ function loadReport() {
       }
       renderKPIs(d.kpis);
       initCharts(d);
+      // Destroy FIRST so DataTable doesn't wipe the fresh rows
+      if (dtTable) { dtTable.destroy(); dtTable = null; }
       renderTable(d.details);
       initDataTable();
     })

@@ -14,17 +14,25 @@ if (!isset($_SESSION['userid'])) {
 
 $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+// Support both date-range mode (date_from/date_to) and legacy year/month mode
+$dateFrom = isset($_GET['date_from']) && $_GET['date_from'] !== '' ? $_GET['date_from'] : null;
+$dateTo   = isset($_GET['date_to'])   && $_GET['date_to']   !== '' ? $_GET['date_to']   : null;
 $year  = isset($_GET['year'])    ? (int)$_GET['year']    : (int)date('Y');
 $month = isset($_GET['month'])   ? (int)$_GET['month']   : 0;
 $svcID = isset($_GET['service']) ? (int)$_GET['service'] : 0;
 
-$where  = ' WHERE YEAR(s.date) = :year ';
-$params = [':year' => $year];
-
-if ($month > 0) {
-    $where .= ' AND MONTH(s.date) = :month ';
-    $params[':month'] = $month;
+if ($dateFrom && $dateTo) {
+    $where  = ' WHERE s.date >= :date_from AND s.date <= :date_to ';
+    $params = [':date_from' => $dateFrom, ':date_to' => $dateTo];
+} else {
+    $where  = ' WHERE YEAR(s.date) = :year ';
+    $params = [':year' => $year];
+    if ($month > 0) {
+        $where .= ' AND MONTH(s.date) = :month ';
+        $params[':month'] = $month;
+    }
 }
+
 if ($svcID > 0) {
     $where .= ' AND s.serviceID = :svc ';
     $params[':svc'] = $svcID;

@@ -17,6 +17,7 @@ try {
         FROM schedules s
         LEFT JOIN tblusers u  ON u.id  = s.userID
         LEFT JOIN services sv ON sv.ID = s.serviceID
+        WHERE s.status NOT IN ('Cancelled','Canceled')
         ORDER BY s.date, s.time_start
     ");
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
